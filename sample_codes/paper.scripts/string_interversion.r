@@ -15,10 +15,8 @@ library(igraph)
 library(reshape2)
 
 # Files created with ./paper.scripts/string_annotation.r
-load("./r.data.files/string.v10.rda")
-load("./r.data.files/string.v9.rda")
-g -> g.10
-g -> g.9
+load("./r.data.files/string.v10.rda") #g.10
+load("./r.data.files/string.v9.rda") #g.9
 
 # get graph intersection
 graph.intersection(g.10, g.9, keep.all.vertices = F) -> intersection
