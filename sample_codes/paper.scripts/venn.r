@@ -9,7 +9,7 @@
 # ---
 # ---
 # comparison of v9_05 and v10 networks based on host factors:
-# Figure 2A and B
+# Figures 2A and B
 
 # check edges in common; restrict vhn.g for this comparison to human-human interactions included
 # add version 10 for string
@@ -27,8 +27,8 @@ source('./scripts/routineFuncs.r')
 # http://cbdm-01.zdv.uni-mainz.de/~mschaefer/hippie/hippie_v1_7.txt
 load("./r.data.files/string.v10.rda") #g.10
 load("./r.data.files/string.v9.rda") #g.9
-load("./r.data.files/hippie.rda.1.8") # ppi.igraph
-load("./r.data.files/hippie.rda.1.7") # ppi.igraph
+load("./r.data.files/hippie.rda.1.8") # ppi.igraph.1.8
+load("./r.data.files/hippie.rda.1.7") # ppi.igraph.1.7
 
 list(g.10, g.9, ppi.igraph.1.8, ppi.igraph.1.7) -> graphs
 names(graphs) <- c("STRING_v10", "STRING_v9_05", "HIPPIE_v1_8", "HIPPIE_v1_7")
