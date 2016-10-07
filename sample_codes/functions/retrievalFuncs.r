@@ -51,7 +51,12 @@ getAbstract <- function(xml.trees, call.origin="abstract"){
 # Retrieval from KEGG
 getKEGGgraph <- function(pid){  
   tmpXML <- "test_kegg.xml"
-  retrieveKGML(pid, organism='hsa', destfile=tmpXML, method="wget")
+  # retrieveKGML works fine in Linux systems, but not in Mac
+  # retrieveKGML(pid, organism='hsa', destfile=tmpXML, method="wget")
+  # alternative implementation
+  getKGMLurl(pathwayid = pid, organism = "hsa") -> kgml
+  download.file(kgml, destfile = tmpXML)
+  
   kegg.g <- parseKGML2Graph(tmpXML,expandGenes=TRUE)  
   kegg.g.n <- getKEGGnodeData(kegg.g)
   mapkGedgedata <- getKEGGedgeData(kegg.g)
