@@ -69,7 +69,7 @@ getKEGGgraph <- function(pid){
   nodesNames <- sapply(mget(ioGeneID, org.Hs.egSYMBOL, ifnotfound=NA), "[[",1)
   nAttrs <- list()
   nAttrs$fillcolor <- makeAttr(kegg.g, "lightgrey", list(orange=names(ios)[ios]))
-  nAttrs$label <- nodesNames
+  nAttrs$label <- as.character(nodesNames)
   igraph.from.graphNEL(kegg.g, name = TRUE, weight = TRUE,
                        unlist.attrs = TRUE) -> kegg.i
   sapply(gsub("hsa:", "", V(kegg.i)$name), function(x) 
