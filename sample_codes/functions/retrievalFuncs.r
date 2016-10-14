@@ -1,3 +1,11 @@
+##========================================================
+##
+##  Credits:
+##  Code written by MPDobay for flu interaction network analysis
+##  SystemsX project: BCF/SIB
+##
+##========================================================
+
 library(XML)
 library(igraph)
 library(graph)

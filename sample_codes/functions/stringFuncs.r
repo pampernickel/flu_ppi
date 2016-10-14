@@ -2,7 +2,7 @@
 ##
 ##  Credits:
 ##  Code written by MPDobay for flu interaction network analysis
-##  SystemsX project: BCF/SIB (Delorenzi/Stertz/Kunz)
+##  SystemsX project: BCF/SIB
 ##
 ##========================================================
 library(STRINGdb)
