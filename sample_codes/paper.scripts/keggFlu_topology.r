@@ -30,6 +30,28 @@ source('./sample_codes/functions/graphFuncs.r')
 load("./r.data.files/string.v10.rda") # g
 load("./r.data.files/hippie.rda.1.8") # ppi.igraph.1.8
 
+
+# local functions
+visGraph <- function(graph, color.map){
+  sapply(V(graph)$z.rsa, function(x)
+    color.map[which(color.map[,1] %in% x),2]) -> V(graph)$colors
+  as.numeric(V(graph)$z.rsa)*-1 -> inv.rsa
+  size=inv.rsa+abs(min(inv.rsa))+0.05
+  
+  get.data.frame(graph, what="edges") -> edge.df.string
+  induced.subgraph(graph, 
+                   which(V(graph)$name %in% c(edge.df.string$to, edge.df.string$from))) -> graph
+  
+  plot(graph, layout=layout.fruchterman.reingold, 
+       vertex.size=size, 
+       vertex.label.dist=0.6, vertex.label.cex=0.5, 
+       vertex.color=V(graph)$colors,
+       vertex.label.family="sans",
+       edge.color=E(graph)$color,
+       vertex.label.color= "grey20",
+       edge.width=E(graph)$weight) 
+}
+
 # KEGG graphs, generated using the same methods shown in sampleScripts.r
 # then merged with STRING v.10 and v.9 graphs to create object
 # a list object kegg.string.graphs. kegg.string.graphs is a list
@@ -77,21 +99,7 @@ unique(V(kegg.flu.string)$z.rsa[which(as.numeric(V(kegg.flu.string)$z.rsa) >= 0)
 rbind(cbind(neg.scores[order(neg.scores)], colors.neg[c(length(colors.neg):1)]),
       cbind(pos.scores[order(pos.scores)], colors.pos)) -> color.map
 
-graph <- kegg.flu.hippie
-sapply(V(graph)$z.rsa, function(x)
-  color.map[which(color.map[,1] %in% x),2]) -> V(graph)$colors
-as.numeric(V(graph)$z.rsa)*-1 -> inv.rsa
-size=inv.rsa+abs(min(inv.rsa))+0.05
-
-get.data.frame(graph, what="edges") -> edge.df.string
-induced.subgraph(graph, 
-                 which(V(graph)$name %in% c(edge.df.string$to, edge.df.string$from))) -> graph
-
-plot(graph, layout=layout.fruchterman.reingold, 
-     vertex.size=size, 
-     vertex.label.dist=0.6, vertex.label.cex=0.5, 
-     vertex.color=V(graph)$colors,
-     vertex.label.family="sans",
-     edge.color=E(graph)$color,
-     vertex.label.color= "grey20",
-     edge.width=E(graph)$weight) 
+# visualize graphs
+par(mfrow=c(1,2))
+visGraph(kegg.flu.string)
+visGraph(kegg.flu.hippie)
