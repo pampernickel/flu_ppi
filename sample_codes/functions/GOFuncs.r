@@ -9,7 +9,9 @@
 # global stuff
 suppressPackageStartupMessages({library(GO.db, quietly=TRUE)})
 suppressPackageStartupMessages({library(org.Hs.eg.db, quietly=TRUE)})
-source('./scripts/routineFuncs.r')
+
+source('./sample_codes/functions/routineFuncs.r')
+
 xx <- as.list(org.Hs.egGO2ALLEGS)
 
 `%ni%` <- Negate(`%in%`)

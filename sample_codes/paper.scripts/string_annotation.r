@@ -9,11 +9,11 @@
 library(igraph)
 library(STRINGdb)
 
-source('./scripts/stringFuncs.r')
-source('./scripts/GOFuncs.r')
-source('./scripts/graphAnnotationFuncs.r')
+source('./sample_codes/functions/stringFuncs.r')
+source('./sample_codes/functions/GOFuncs.r')
+source('./sample_codes/functions/graphAnnotationFuncs.r')
 
-read.csv("./data/annotations/hgnc.csv")
+read.csv("./data/annotations/hgnc.csv") -> hgnc
 
 # ---
 # ---

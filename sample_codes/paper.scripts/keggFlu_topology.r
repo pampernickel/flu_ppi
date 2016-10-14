@@ -19,9 +19,9 @@ library(stringdist)
 library(parallel)
 library(MASS)
 
-source('./scripts/routineFuncs.r')
-source('./scripts/informationMiningFuncs.R')
-source('./scripts/graphFuncs.r')
+source('./sample_codes/functions/routineFuncs.r')
+source('./sample_codes/functions/retrievalFuncs.R')
+source('./sample_codes/functions/graphFuncs.r')
 
 # ---
 # ---

@@ -14,7 +14,7 @@ library(ggplot2)
 library(igraph)
 library(reshape2)
 
-# Files created with ./paper.scripts/string_annotation.r
+# Files created with ./sample_codes/paper.scripts/string_annotation.r
 load("./r.data.files/string.v10.rda") #g.10
 load("./r.data.files/string.v9.rda") #g.9
 

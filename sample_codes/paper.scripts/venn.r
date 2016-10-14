@@ -18,7 +18,7 @@ library(igraph)
 library(reshape2)
 library(VennDiagram)
 
-source('./scripts/routineFuncs.r')
+source('./sample_codes/functions/routineFuncs.r')
 
 # Files created with ./paper.scripts/string_annotation.r
 # In the case of HIPPIE, these were created in an analogus manner from the HIPPIE v1_7 and
