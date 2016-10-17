@@ -56,6 +56,10 @@ getAbstract <- function(xml.trees, call.origin="abstract"){
   return(text)
 }
 
+checkXML <- function(file){
+  file.info(file)$size
+}
+
 # Retrieval from KEGG
 getKEGGgraph <- function(pid){  
   tmpXML <- "test_kegg.xml"
@@ -65,23 +69,29 @@ getKEGGgraph <- function(pid){
   getKGMLurl(pathwayid = pid, organism = "hsa") -> kgml
   download.file(kgml, destfile = tmpXML)
   
-  kegg.g <- parseKGML2Graph(tmpXML,expandGenes=TRUE)  
-  kegg.g.n <- getKEGGnodeData(kegg.g)
-  mapkGedgedata <- getKEGGedgeData(kegg.g)
-  
-  outs <- sapply(edges(kegg.g), length) > 0
-  ins <- sapply(inEdges(kegg.g), length) > 0
-  ios <- outs | ins
-
-  ioGeneID <- translateKEGGID2GeneID(names(ios))
-  nodesNames <- sapply(mget(ioGeneID, org.Hs.egSYMBOL, ifnotfound=NA), "[[",1)
-  nAttrs <- list()
-  nAttrs$fillcolor <- makeAttr(kegg.g, "lightgrey", list(orange=names(ios)[ios]))
-  nAttrs$label <- as.character(nodesNames)
-  igraph.from.graphNEL(kegg.g, name = TRUE, weight = TRUE,
-                       unlist.attrs = TRUE) -> kegg.i
-  sapply(gsub("hsa:", "", V(kegg.i)$name), function(x) 
-    xx[[which(names(xx) %in% x)]]) -> V(kegg.i)$name
+  # check test_kegg.xml if it contains a valid (i.e. Homo sapiens) network
+  # or if it is empty -- in which case the map is comprised purely of 
+  # non-human proteins (and no links to human protein interactants)
+  kegg.i <- NA
+  if (checkXML(tmpXML) > 10){
+    kegg.g <- parseKGML2Graph(tmpXML,expandGenes=TRUE)  
+    kegg.g.n <- getKEGGnodeData(kegg.g)
+    mapkGedgedata <- getKEGGedgeData(kegg.g)
+    
+    outs <- sapply(edges(kegg.g), length) > 0
+    ins <- sapply(inEdges(kegg.g), length) > 0
+    ios <- outs | ins
+    
+    ioGeneID <- translateKEGGID2GeneID(names(ios))
+    nodesNames <- sapply(mget(ioGeneID, org.Hs.egSYMBOL, ifnotfound=NA), "[[",1)
+    nAttrs <- list()
+    nAttrs$fillcolor <- makeAttr(kegg.g, "lightgrey", list(orange=names(ios)[ios]))
+    nAttrs$label <- as.character(nodesNames)
+    igraph.from.graphNEL(kegg.g, name = TRUE, weight = TRUE,
+                         unlist.attrs = TRUE) -> kegg.i
+    sapply(gsub("hsa:", "", V(kegg.i)$name), function(x) 
+      xx[[which(names(xx) %in% x)]]) -> V(kegg.i)$name 
+  }
   return(kegg.i)
 }
 
