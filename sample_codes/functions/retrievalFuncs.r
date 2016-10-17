@@ -125,3 +125,14 @@ mapToSTRING <- function(vertex_map, g, mode=c("directed", "undirected")){
   }
   return(g)
 }
+
+readKEGGbrite <- function(path){
+  readLines(path) -> txt
+  txt[grep("Infectious", txt)] -> headings
+  grep("Infectious", txt) -> ind
+  # given that the interest is in Bacterial and Viral diseases
+  ind[1] -> s
+  ind[3] -> e
+  unlist(lapply(strsplit(txt[s:e], " "), function(x) x[grep("0", x)])) -> all.pathways
+  return(all.pathways)
+}
