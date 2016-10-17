@@ -15,7 +15,9 @@ library(stringr)
 # custom functions
 source('./sample_codes/functions/retrievalFuncs.r')
 
-# download all KEGG topologies linked to infection
+# ---
+# ---
+# download all KEGG references linked to infection
 readKEGGbrite("./data/annotations/br08901.keg") -> all.pathways
 lapply(all.pathways, function(x){
   print(paste("Processing hsa", x, " ...", sep=""))
@@ -49,3 +51,18 @@ lapply(all.pathways, function(x){
 }) -> pathway.refs
 names(pathway.refs) <- all.pathways
 save(pathway.refs, file="./data/r.data.files/kegg_refs/infectiousDiseases.rda")
+# ---
+# ---
+
+# ---
+# ---
+# download KEGG networks linked to all infectious disease pathways available
+lapply(all.pathways, function(x){
+  getKEGGgraph(x)
+}) -> idnets
+names(idnets) <- names(all.pathways)
+idnets[which(sapply(idnets, function(x) class(x)) %in% "igraph")] -> idnets
+save(idnets, file="./data/r.data.files/kegg_refs/infectiousDiseaseGraphs.rda")
+# ---
+# ---
+
