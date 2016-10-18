@@ -20,3 +20,24 @@ loadAliases <- function(v=""){
   }  
   return(aliases)
 }
+
+graph2STRING <- function(g, string.db=NULL){
+  # g = igraph object with HGNC gene symbols as names (other forms not yet handled)
+  # converts g to form with STRING identifiers; returns, g, STRING equivalent and
+  # mapping between HGNC symbol and STRING identifiers; should preclude the need for
+  # loadAliases from local by returning the initial mapping
+  g -> g.s
+  if (is.null(string.db)){
+    string.db <- STRINGdb$new(version="10", species=9606,score_threshold=0, input_directory="")
+  }
+  
+  vertex_map <- string.db$map(prepareMap(V(g)$name), "vertex", removeUnmappedRows = TRUE)
+  as.character(unlist(sapply(V(g)$name, function(x) 
+    ifelse(x %in% vertex_map$vertex, vertex_map$STRING_id[which(vertex_map$vertex %in% x)], x)))) -> V(g.s)$name
+  
+  # then drop vertices that cannot be mapped
+  induced.subgraph(g.s, grep("9606", V(g.s)$name)) -> g.s
+  list(g, g.s, vertex_map) -> res
+  names(res) <- c("graph", "STRING", "vmap")
+  return(res)
+}

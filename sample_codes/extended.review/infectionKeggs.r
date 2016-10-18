@@ -15,6 +15,7 @@ library(plyr)
 
 # custom functions
 source('./sample_codes/functions/retrievalFuncs.r')
+source('./sample_codes/functions/stringFuncs.r')
 
 # ---
 # ---
@@ -75,7 +76,7 @@ save(idnets, file="./data/r.data.files/kegg_refs/infectiousDiseaseGraphs.rda")
 # note that in some cases, the session might be disconnected (on STRING load)
 # to be on the safe side, end with save.image() after lapply statement
 load("./data/r.data.files/kegg_refs/infectiousDiseaseGraphs.rda")
-string.db <- STRINGdb$new(version="10", species=9606,score_threshold=0, input_directory="" )
+string.db <- STRINGdb$new(version="10", species=9606,score_threshold=0, input_directory="")
 string <- string.db$get_graph()
 lapply(idnets, function(x){
   vertex_map <- string.db$map(prepareMap(V(x)$name), "vertex", removeUnmappedRows = TRUE)
@@ -123,5 +124,8 @@ lapply(idnets, function(x)
 lapply(1:length(nn), function(x){
   constructGraph(nn[[x]], g, V(idnets[[x]])$name)}) -> idnets_nn
 save(idnets_nn, file="./data/r.data.files/kegg_refs/infectiousDiseaseGraph_netneighborhood.rda")
+
+# map to STRING
+lapply(idnets_nn, function(x) graph2STRING(x, string.db)) -> idnets_nns
 # ---
 # ---
