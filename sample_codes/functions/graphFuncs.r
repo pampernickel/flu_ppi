@@ -6,6 +6,8 @@
 ##
 ##========================================================
 
+require(plyr)
+
 source('./sample_codes/functions/routineFuncs.r')
 
 
@@ -77,22 +79,26 @@ constructGraph <- function(nn, ppis, p){
   # then, for each constructed subgraph, get
   # induce a subgraph from the original (so that attributes are
   # maintained)
-  lapply(nn, function(x){
+  if (length(p) != length(nn)){
+    stop("List of network neighborhoods (nn) and proteins (p) must have equal lengths")
+  }
+  
+  lapply(1:length(nn), function(x){
     gdf <- matrix(0, nrow=0, ncol=2)
     colnames(gdf) <- c("source", "target")
-    for (i in 1:length(p)){
-      x[[i]][which(x[[i]] %ni% p[i])] -> fin
-      cbind(rep(p[i], length(fin)), fin) -> t
+    if (length(nn[[x]]) > 0){
+      nn[[x]][which(nn[[x]] %ni% p[x])] -> fin
+      cbind(rep(p[x], length(fin)), fin) -> t
       colnames(t) <- colnames(gdf)
       rbind(gdf, t) -> gdf
     }
     return(gdf)
   }) -> sg.df
+  sg.df[which(sapply(sg.df, function(x) nrow(x)) > 0)] -> sg.df
+  sg.df <- ldply (sg.df, data.frame)
   
-  lapply(1:length(sg.df), function(x){
-    apply(sg.df[[x]], 1, function(y) get.edge.ids(ppis[[x]], y, directed = F)) -> eids
-    subgraph.edges(ppis[[x]], eids, delete.vertices = T) -> sg
-  }) -> sg
+  apply(sg.df, 1, function(y) get.edge.ids(ppis, y, directed = F)) -> eids
+  subgraph.edges(ppis, eids, delete.vertices = T) -> sg
   
   return(sg)
 }
