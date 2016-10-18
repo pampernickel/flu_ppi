@@ -120,5 +120,8 @@ subgraph.edges(g, which(E(g)$combined_score >= 400), delete.vertices=T) -> g
 lapply(idnets, function(x) as.undirected(x)) -> idnets
 lapply(idnets, function(x) 
   lapply(V(x)$name, function(y) getNeighbors(g, y, ord=1))) -> nn
+lapply(1:length(nn), function(x){
+  constructGraph(nn[[x]], g, V(idnets[[x]])$name)}) -> idnets_nn
+save(idnets_nn, file="./data/r.data.files/kegg_refs/infectiousDiseaseGraph_netneighborhood.rda")
 # ---
 # ---
