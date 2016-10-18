@@ -12,6 +12,7 @@ library(rentrez)
 library(XML)
 library(stringr)
 library(plyr)
+library(NMF)
 
 # custom functions
 source('./sample_codes/functions/retrievalFuncs.r')
@@ -62,8 +63,9 @@ save(pathway.refs, file="./data/r.data.files/kegg_refs/infectiousDiseases.rda")
 lapply(all.pathways, function(x){
   getKEGGgraph(x)
 }) -> idnets
-names(idnets) <- names(all.pathways)
-idnets[which(sapply(idnets, function(x) class(x)) %in% "igraph")] -> idnets
+which(sapply(idnets, function(x) class(x)) %in% "igraph") -> ind
+idnets[ind] -> idnets
+all.pathways[ind] -> names(idnets)
 save(idnets, file="./data/r.data.files/kegg_refs/infectiousDiseaseGraphs.rda")
 # ---
 # ---
@@ -145,5 +147,42 @@ for (i in 1:nrow(ref.df)){
     save(ref.df, pmids, file="./data/r.data.files/kegg_refs/infectiousDiseaseSTRING_nn_refs.rda")
   }
 }
+# ---
+# ---
+
+# ---
+# ---
+# First check: quantify the number of edges that are present in other PPIs
+# (not the network neighborhood)
+load("./data/r.data.files/all.ppis.rda") # created in ./sample_codes/book.chapter/entry.topology.r
+sapply(ppis, function(x)
+  unlist(sapply(idnets, function(y){
+    get.data.frame(y)[,1:2] -> df
+    length(which(apply(df, 1, function(z){
+      eid <- NA
+      if (z[1] %in% V(x)$name & z[2] %in% V(x)$name){
+        get.edge.ids(x, z, directed=F) -> eid
+      }
+    }) %ni% c(NA, 0)))/nrow(df)
+  }))) -> echeck
+rownames(echeck) <- paste("hsa", names(idnets), sep="")
+# aheatmap(echeck, Colv=F)
+
+# check through filters of string as well
+sapply(seq(100,900,by=100), function(x){
+  subgraph.edges(ppis[[1]], which(E(ppis[[1]])$combined_score >= x), 
+                 delete.vertices = T) -> sg
+  unlist(sapply(idnets, function(y){
+      get.data.frame(y)[,1:2] -> df
+      length(which(apply(df, 1, function(z){
+      eid <- NA
+      if (z[1] %in% V(sg)$name & z[2] %in% V(sg)$name){
+           get.edge.ids(sg, z, directed=F) -> eid
+      }}) %ni% c(NA, 0)))/nrow(df)
+  }))
+}) -> echeck.filt         
+colnames(echeck.filt) <- seq(100,900,by=100)
+rownames(echeck.filt) <- paste("hsa", names(idnets), sep="")
+# aheatmap(echeck.filt, Rowv=F, Colv=F) # saved as ./results/infectiousDiseaseKeggs/echeck.filt.pdf
 # ---
 # ---
