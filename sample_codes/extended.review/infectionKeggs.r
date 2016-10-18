@@ -105,7 +105,7 @@ for (i in 1:nrow(ref.df)){
   pmids[[i]] <- string.db$get_pubmed_interaction(ref.df$from[i], ref.df$to[i])
   if (i %in% seq(1,nrow(ref.df),by=10)){
     print(paste("Saving reference set ", i, "...", sep=""))
-    save(pmids, file="./data/r.data.files/kegg_refs/infectiousDiseaseSTRING_refs.rda")
+    save(ref.df, pmids, file="./data/r.data.files/kegg_refs/infectiousDiseaseSTRING_refs.rda")
   }
 }
 # ---
@@ -115,7 +115,9 @@ for (i in 1:nrow(ref.df)){
 # ---
 # ---
 # get network neighborhood of each kegg network in STRING; use version that is
-# already mapped to gene symbols; filter graph first using default 400 filter
+# already mapped to gene symbols; filter graph first using default 400 filter;
+# in addition, retrieve all references associated with the network neighborhood; to be
+# used in filtering
 load("./data/r.data.files/string.v10.rda")
 subgraph.edges(g, which(E(g)$combined_score >= 400), delete.vertices=T) -> g
 lapply(idnets, function(x) as.undirected(x)) -> idnets
@@ -127,5 +129,21 @@ save(idnets_nn, file="./data/r.data.files/kegg_refs/infectiousDiseaseGraph_netne
 
 # map to STRING
 lapply(idnets_nn, function(x) graph2STRING(x, string.db)) -> idnets_nns
+save(idnets_nn, idnets_nns, file="./data/r.data.files/kegg_refs/infectiousDiseaseGraph_netneighborhood.rda")
+
+lapply(idnets_nns, function(x) get.data.frame(x$STRING)[,1:2]) -> s
+ref.df <- ldply (s, data.frame)
+if (length(which(duplicated(ref.df))) > 0){
+  ref.df[-which(duplicated(ref.df)),] -> ref.df
+}
+
+pmids <- list()
+for (i in 1:nrow(ref.df)){
+  pmids[[i]] <- string.db$get_pubmed_interaction(ref.df$from[i], ref.df$to[i])
+  if (i %in% seq(1,nrow(ref.df),by=10)){
+    print(paste("Saving reference set ", i, "...", sep=""))
+    save(ref.df, pmids, file="./data/r.data.files/kegg_refs/infectiousDiseaseSTRING_nn_refs.rda")
+  }
+}
 # ---
 # ---
