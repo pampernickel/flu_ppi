@@ -86,3 +86,22 @@ listToDf <- function(l){
   }
   return(fin.df)
 }
+
+source_https <- function(url, ...) {
+  # load package
+  # parse and evaluate each .R script
+  # source: https://www.r-bloggers.com/source_https-sourcing-an-r-script-from-github-over-https/
+  sapply(c(url, ...), function(u) {
+    eval(parse(text = getURL(u, followlocation = TRUE, cainfo = system.file("CurlSSL", "cacert.pem", package = "RCurl"))), envir = .GlobalEnv)
+  })
+}
+
+loadDependencies() <- function(){
+  print("Loading scripts from pampernickel/flu_ppi...")
+  source_https('https://raw.githubusercontent.com/pampernickel/flu_ppi/master/sample_codes/functions/graphFuncs.r')
+  source_https('https://github.com/pampernickel/flu_ppi/blob/master/sample_codes/functions/GOFuncs.r')
+  source_https('https://github.com/pampernickel/flu_ppi/blob/master/sample_codes/functions/graphAnnotationFuncs.r')
+  source_https('https://github.com/pampernickel/flu_ppi/blob/master/sample_codes/functions/retrievalFuncs.r')
+  source_https('https://github.com/pampernickel/flu_ppi/blob/master/sample_codes/functions/stringFuncs.r')
+  print("Done.")
+}
