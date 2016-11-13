@@ -96,7 +96,7 @@ source_https <- function(url, ...) {
   })
 }
 
-loadDependencies() <- function(){
+loadDependencies <- function(){
   print("Loading scripts from pampernickel/flu_ppi...")
   source_https('https://raw.githubusercontent.com/pampernickel/flu_ppi/master/sample_codes/functions/graphFuncs.r')
   source_https('https://github.com/pampernickel/flu_ppi/blob/master/sample_codes/functions/GOFuncs.r')
