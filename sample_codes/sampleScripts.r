@@ -144,6 +144,7 @@ getgos(xx, hgnc) -> gos
 getgos_cc(xx, hgnc) -> gos.cc
 nodeToGO(entry.graph, gos$symbol, "gos") -> entry.graph
 nodeToGO(entry.graph, gos.cc$symbol, "gos.cc") -> entry.graph
+delete.vertices(entry.graph, which(igraph:::degree(entry.graph) == 0)) -> entry.graph
 
 # extract all nodes with annotations containing the ff GO terms and their
 # descendants:
@@ -194,7 +195,6 @@ sapply(V(entry.graph)$name, function(x){
   return(res)
 }) -> voi
 induced.subgraph(entry.graph, which(voi %in% T)) -> entry.graph.2
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
