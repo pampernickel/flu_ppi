@@ -114,7 +114,8 @@ match
 # ---
 # ---
 # Basic GO term filtering example
-# Example 2: Retain edges that contain user-defined GO terms in common
+# Example 2: Retain edges that either contain user-defined GO terms in common, or
+#            vertices that are annotated with GO terms of interest
 
 # IAV entry factors; in RStudio, use 'import dataset from web url' option under the 'workspace' tab:
 # https://raw.githubusercontent.com/pampernickel/flu_ppi/master/data/metaanalysis/entry.screen.csv
