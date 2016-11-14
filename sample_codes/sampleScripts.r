@@ -184,6 +184,7 @@ for (i in 1:ecount(entry.graph)){
   }
 }
 subgraph.edges(entry.graph, which(eoi %in% T), delete.vertices=T) -> entry.graph.1
+delete.vertices(entry.graph.1, which(igraph:::degree(entry.graph.1) == 0)) -> entry.graph.1
 
 # option 2:
 # keep vertices annotated with a GO term of interest
@@ -195,6 +196,7 @@ sapply(V(entry.graph)$name, function(x){
   return(res)
 }) -> voi
 induced.subgraph(entry.graph, which(voi %in% T)) -> entry.graph.2
+delete.vertices(entry.graph.2, which(igraph:::degree(entry.graph.2) == 0)) -> entry.graph.2
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
