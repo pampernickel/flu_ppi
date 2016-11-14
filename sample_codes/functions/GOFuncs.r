@@ -24,7 +24,7 @@ getgos <- function(xx){
   return(gos)
 }
 
-getGO.cc <- function(){
+getgos_cc <- function(xx){
   suppressPackageStartupMessages({require('org.Hs.eg.db', quietly=TRUE)})
   suppressPackageStartupMessages({require(igraph, quietly=TRUE)})
   # --- append GO terms to graph
