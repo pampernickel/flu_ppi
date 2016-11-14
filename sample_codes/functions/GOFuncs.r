@@ -9,10 +9,9 @@
 # global stuff
 library(GO.db)
 library(org.Hs.eg.db)
-xx <- as.list(org.Hs.egGO2ALLEGS)
 
 # --- retrieve gos
-getgos <- function(){
+getgos <- function(xx){
   # --- append GO terms to graph
   sql <- "SELECT DISTINCT go_id FROM go_bp"
   dbGetQuery(org.Hs.eg_dbconn(),sql) -> goss
