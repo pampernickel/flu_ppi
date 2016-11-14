@@ -55,6 +55,11 @@ symbol2entrez <- function(gene.names){
   return(gene.IDs)
 }
 
+entrez2symbol <- function(go.list, hgnc){
+  lapply(go.list, function(x) return(unique(hgnc$hgnc_symbol[which(hgnc$entrez_id %in% unlist(x))]))) -> go.list.s
+  return(go.list.s)
+}
+
 uniprot2entrez <- function(prot.names){
   # --- for prot.names, ensure that the isoforms are
   # --- also mapped
