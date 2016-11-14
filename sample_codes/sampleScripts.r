@@ -11,9 +11,14 @@ library(igraph)
 library(rentrez)
 library(XML)
 library(stringr)
+library(GO.db)
+library(RCurl)
+library(org.Hs.eg.db)
 
-# custom functions
-source('./sample_codes/functions/retrievalFuncs.r')
+# load custom functions
+getURL("https://raw.githubusercontent.com/pampernickel/flu_ppi/master/sample_codes/functions/routineFuncs.r", ssl.verifypeer = F) -> script
+eval(parse(text=script))
+loadDependencies()
 
 # ---
 # ---
@@ -35,7 +40,7 @@ abstract <- unlist(getAbstract(list(xml.trees)))
 
 # ---
 # ---
-# Basic filtering example
+# Basic keyword filtering example
 # Example 1: Retain edges that contain a keyword with minimum frequency above the median
 # this example uses a simple grep, without keyword stemming
 
@@ -45,7 +50,7 @@ getKEGGgraph("05164") -> iav
 # load STRINGdb; versions used in are 10 and 9_05
 string.db <- STRINGdb$new(version="10", species=9606,score_threshold=0, input_directory="" )
 string <- string.db$get_graph()
-vertex_map <- string.db$map(prepareMap(V(iav)$name), "vertex", removeUnmappedRows = TRUE)
+vertex_map <- string.db$map(prepareMap(hits), "vertex", removeUnmappedRows = TRUE)
 mapToSTRING(vertex_map, iav, mode="undirected") -> iavs
 
 # note that iav contains complexes, which are NOT matched in STRING, but which nonetheless
@@ -105,6 +110,90 @@ apply(keywords, 2, function(y){
   })) -> match
 }) -> match
 match
+
+# ---
+# ---
+# Basic GO term filtering example
+# Example 2: Retain edges that contain user-defined GO terms in common
+
+# IAV entry factors; in RStudio, use 'import dataset from web url' option under the 'workspace' tab:
+# https://raw.githubusercontent.com/pampernickel/flu_ppi/master/data/metaanalysis/entry.screen.csv
+# https://raw.githubusercontent.com/pampernickel/flu_ppi/master/data/annotations/hgnc.csv
+entry.factors <- read.csv("./data/metaanalysis/entry.screen.csv", stringsAsFactor=F)
+validated.hits <- entry.factors$gene
+unique(validated.hits) -> hits
+
+string.db <- STRINGdb$new(version="10", species=9606,score_threshold=0, input_directory="")
+string <- string.db$get_graph()
+vertex_map <- string.db$map(prepareMap(hits), "vertex", removeUnmappedRows = TRUE)
+sapply(vertex_map$STRING_id, function(x) getNeighbors(string, x, 1)) -> entry.neighborhood
+constructGraph(entry.neighborhood, string, hits) -> entry.graph
+rev_map <- string.db$get_aliases()
+
+# keep neighbors annotated with hgnc symbols
+rev_map[which(rev_map$alias %in% hgnc$hgnc_symbol),] -> rev_map
+sapply(V(entry.graph)$name, function(x) 
+  ifelse(x %in% rev_map$STRING_id, rev_map$alias[which(rev_map$STRING_id %in% x)], NA)) -> aliases
+as.character(aliases) -> V(entry.graph)$name
+induced.subgraph(entry.graph, which(V(entry.graph)$name %ni% NA)) -> entry.graph
+
+# annotate vertices with GO terms
+xx <- as.list(org.Hs.egGO2ALLEGS)
+getgos(xx, hgnc) -> gos
+getgos_cc(xx, hgnc) -> gos.cc
+nodeToGO(entry.graph, gos$symbol, "gos") -> entry.graph
+nodeToGO(entry.graph, gos.cc$symbol, "gos.cc") -> entry.graph
+
+# extract all nodes with annotations containing the ff GO terms and their
+# descendants:
+# GO:0016192: vesicle-mediated transport
+# GO:0060627: regulation of vesicle-mediated transport
+xx_desc <- as.list(GOBPCHILDREN)
+xx_desc <- xx_desc[!is.na(xx_desc)]
+unlist(xx_desc[which(names(xx_desc) %in% c("GO:0060627","GO:0016192"))]) -> l1
+as.character(getGOnames(l1)) -> n.l1
+
+# get all children of l1
+unlist(xx_desc[which(names(xx_desc) %in% l1)]) -> l2
+unique(c(l1, l2)) -> goi
+getGOnames(goi) -> n.goi
+as.character(getGOnames(goi)) -> n.goi
+cbind(goi, n.goi) -> gois
+
+# remove terms that are not relevant to the type of vesicle-mediated transport
+# of interest, including negative regulation of transport, synaptic vesicle transport, 
+# etc.
+lapply(c("negative", "axon", "synapt", "antigen", "immunoglobulin", 
+         "platelet", "floral"), function(x)
+           grep(x, gois[,2], ignore.case=T)) -> exc
+unique(unlist(exc)) -> exc
+gois[which(gois[,1] %ni% gois[exc]),] -> gois
+
+# option 1:
+# keep edges whose incident vertices are annotated with GO term(s) of interest
+eoi <- rep(F, ecount(entry.graph))
+for (i in 1:ecount(entry.graph)){
+  unlist(strsplit(as_ids(E(entry.graph)[i]), "\\|")) -> v # vertices
+  intersect(which(getNodeAttribute(entry.graph, "gos", v[1]) %in% gois[,1]),
+            which(getNodeAttribute(entry.graph, "gos", v[2]) %in% gois[,1])) -> m
+  
+  if (length(m) > 0){
+    eoi[i] <- T
+  }
+}
+subgraph.edges(entry.graph, which(eoi %in% T), delete.vertices=T) -> entry.graph.1
+
+# option 2:
+# keep vertices annotated with a GO term of interest
+sapply(V(entry.graph)$name, function(x){
+  res <- F
+  if (length(which(getNodeAttribute(entry.graph, "gos", x) %in% gois[,1])) > 0){
+    res <- T
+  }
+  return(res)
+}) -> voi
+induced.subgraph(entry.graph, which(voi %in% T)) -> entry.graph.2
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
