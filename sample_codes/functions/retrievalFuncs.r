@@ -14,9 +14,9 @@ library(KEGGgraph)
 library(rentrez)
 library(org.Hs.eg.db)
 
-x <- org.Hs.egSYMBOL
-mapped_genes <- mappedkeys(x)
-xx <- as.list(x[mapped_genes])
+symbol <- org.Hs.egSYMBOL
+mapped_genes <- mappedkeys(symbol)
+symbol.map <- as.list(symbol[mapped_genes])
 
 # Retrieval from PubMed
 getAbstract <- function(xml.trees, call.origin="abstract"){
@@ -89,8 +89,8 @@ getKEGGgraph <- function(pid){
     nAttrs$label <- as.character(nodesNames)
     igraph.from.graphNEL(kegg.g, name = TRUE, weight = TRUE,
                          unlist.attrs = TRUE) -> kegg.i
-    sapply(gsub("hsa:", "", V(kegg.i)$name), function(x) 
-      xx[[which(names(xx) %in% x)]]) -> V(kegg.i)$name 
+    as.character(sapply(gsub("hsa:", "", V(kegg.i)$name), function(x) 
+      nodesNames[which(names(nodesNames) %in% x)])) -> V(kegg.i)$name
   }
   return(kegg.i)
 }
