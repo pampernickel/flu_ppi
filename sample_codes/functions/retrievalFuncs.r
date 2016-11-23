@@ -66,6 +66,7 @@ getKEGGgraph <- function(pid){
   # retrieveKGML works fine in Linux systems, but not in Mac
   # retrieveKGML(pid, organism='hsa', destfile=tmpXML, method="wget")
   # alternative implementation
+  # Note that this version may have issues in the linux system at the level of parseKGML2Graph
   getKGMLurl(pathwayid = pid, organism = "hsa") -> kgml
   download.file(kgml, destfile = tmpXML)
   
