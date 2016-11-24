@@ -56,10 +56,12 @@ getAbstract <- function(xml.trees, call.origin="abstract"){
   return(text)
 }
 
-getYear <- function(xml.trees){
+getNode <- function(xml.trees, tag){
+  # get year of publication
+  # 'tag' is an xml tag, e.g. '//PubDate', '//ArticleTitle'
   lapply(xml.trees, function(x) 
-    xmlValue(getNodeSet(x, '//PubDate')[[1]])) -> year
-  return(year)
+    xmlValue(getNodeSet(x, tag)[[1]])) -> res
+  return(res)
 }
 
 checkXML <- function(file){
