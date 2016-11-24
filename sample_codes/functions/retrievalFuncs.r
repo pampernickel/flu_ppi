@@ -56,6 +56,12 @@ getAbstract <- function(xml.trees, call.origin="abstract"){
   return(text)
 }
 
+getYear <- function(xml.trees){
+  lapply(xml.trees, function(x) 
+    xmlValue(getNodeSet(x, '//PubDate')[[1]])) -> year
+  return(year)
+}
+
 checkXML <- function(file){
   file.info(file)$size
 }
