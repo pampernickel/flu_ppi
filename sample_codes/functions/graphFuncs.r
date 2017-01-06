@@ -7,6 +7,7 @@
 ##========================================================
 
 require(plyr)
+require(parallel)
 
 calcSimilarity <- function(graph.1, graph.2){
   # http://lists.nongnu.org/archive/html/igraph-help/2008-04/msg00017.html
@@ -69,28 +70,43 @@ subgraphFromDataFrame <- function(graph, df){
   return(graph.sub)
 }
 
-constructGraph <- function(nn, ppis, p){
+constructGraph <- function(nn, ppis, p, mode=c("single", "multi")){
   # creates a graph from a list nn; each slot of nn contains 
   # a list of neighbors of some proteins p
   # length of nn[[i]] == length(p)
   # then, for each constructed subgraph, get
   # induce a subgraph from the original (so that attributes are
   # maintained)
+  # mode: single or multiple processors
   if (length(p) != length(nn)){
     stop("List of network neighborhoods (nn) and proteins (p) must have equal lengths")
   }
   
-  lapply(1:length(nn), function(x){
-    gdf <- matrix(0, nrow=0, ncol=2)
-    colnames(gdf) <- c("source", "target")
-    if (length(nn[[x]]) > 0){
-      nn[[x]][which(nn[[x]] %ni% p[x])] -> fin
-      cbind(rep(p[x], length(fin)), fin) -> t
-      colnames(t) <- colnames(gdf)
-      rbind(gdf, t) -> gdf
-    }
-    return(gdf)
-  }) -> sg.df
+  if (mode == "single"){
+    lapply(1:length(nn), function(x){
+      gdf <- matrix(0, nrow=0, ncol=2)
+      colnames(gdf) <- c("source", "target")
+      if (length(nn[[x]]) > 0){
+        nn[[x]][which(nn[[x]] %ni% p[x])] -> fin
+        cbind(rep(p[x], length(fin)), fin) -> t
+        colnames(t) <- colnames(gdf)
+        rbind(gdf, t) -> gdf
+      }
+      return(gdf)
+    }) -> sg.df
+  } else if (mode == "multi"){
+    mclapply(1:length(nn), function(x){
+      gdf <- matrix(0, nrow=0, ncol=2)
+      colnames(gdf) <- c("source", "target")
+      if (length(nn[[x]]) > 0){
+        nn[[x]][which(nn[[x]] %ni% p[x])] -> fin
+        cbind(rep(p[x], length(fin)), fin) -> t
+        colnames(t) <- colnames(gdf)
+        rbind(gdf, t) -> gdf
+      }
+      return(gdf)
+    }, mc.cores = detectCores()-1) -> sg.df
+  }
   sg.df[which(sapply(sg.df, function(x) nrow(x)) > 0)] -> sg.df
   sg.df <- ldply (sg.df, data.frame)
   
