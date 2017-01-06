@@ -107,15 +107,20 @@ constructGraph <- function(nn, ppis, p, mode=c("single", "multi")){
       return(gdf)
     }, mc.cores = detectCores()-1) -> sg.df
   }
+  
   sg.df[which(sapply(sg.df, function(x) nrow(x)) > 0)] -> sg.df
   sg.df <- ldply (sg.df, data.frame)
+  
+  as.character(sg.df$source) -> sg.df$source
+  as.character(sg.df$target) -> sg.df$target
   
   if (mode == "single"){
     apply(sg.df, 1, function(y) get.edge.ids(ppis, y, directed = F)) -> eids
   } else if (mode == "multi"){
-    mclapply(1:nrow(sg.df), function(y) get.edge.ids(ppis, c(sg.df[y,1], sg.df[y,2]), directed = F), mc.cores = detectCores()-1) -> eids
+    mclapply(1:nrow(sg.df), function(y) 
+      get.edge.ids(ppis, as.character(sg.df[y,]), 
+                   directed = F), mc.cores = detectCores()-1) -> eids
   }
   subgraph.edges(ppis, eids, delete.vertices = T) -> sg
-  
   return(sg)
 }
