@@ -8,7 +8,6 @@
 
 require(plyr)
 require(parallel)
-require(snow)
 
 calcSimilarity <- function(graph.1, graph.2){
   # http://lists.nongnu.org/archive/html/igraph-help/2008-04/msg00017.html
