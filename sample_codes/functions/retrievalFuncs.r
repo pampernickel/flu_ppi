@@ -74,6 +74,32 @@ checkXML <- function(file){
   file.info(file)$size
 }
 
+.removeNulls <- function(all.ids,...){
+  # used for processing entrez_search() results
+  # other parameters are lists with length equal to all.ids
+  z <- list(...)
+  res <- NULL
+  if (!is.null(z)){
+    # should 
+    sapply(all.ids, function(x) length(x)) -> t
+    which(t > 0) -> ind
+    lapply(z, function(x){
+      if (length(x) == length(all.ids)){
+        x[ind] -> res
+      } else {
+        stop("All arguments must have the same length.")
+      }
+      return(res)
+    }) -> res
+    c(list(all.ids[ind]), res) -> res
+  } else {
+    sapply(all.ids, function(x) length(x)) -> t
+    which(t > 0) -> ind
+    all.ids[ind] -> res
+  }
+  return(res)
+}
+
 # Retrieval from KEGG
 getKEGGgraph <- function(pid){  
   tmpXML <- "test_kegg.xml"
