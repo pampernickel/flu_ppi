@@ -92,6 +92,11 @@ listToDf <- function(l){
   return(fin.df)
 }
 
+lappend <- function(lst, obj) {
+  lst[[length(lst)+1]] <- obj
+  return(lst)
+}
+
 source_https <- function(url, ...) {
   # load package
   # parse and evaluate each .R script
