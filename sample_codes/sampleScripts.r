@@ -48,7 +48,7 @@ abstract <- unlist(getAbstract(list(xml.trees)))
 getKEGGgraph("05164") -> iav
 
 # load STRINGdb; versions used in are 10 and 9_05
-string.db <- STRINGdb$new(version="10", species=9606,score_threshold=0, input_directory="" )
+string.db <- STRINGdb$new(version="10", species=9606,score_threshold=0, input_directory="")
 string <- string.db$get_graph()
 vertex_map <- string.db$map(prepareMap(hits), "vertex", removeUnmappedRows = TRUE)
 mapToSTRING(vertex_map, iav, mode="undirected") -> iavs
@@ -197,6 +197,22 @@ sapply(V(entry.graph)$name, function(x){
 }) -> voi
 induced.subgraph(entry.graph, which(voi %in% T)) -> entry.graph.2
 delete.vertices(entry.graph.2, which(igraph:::degree(entry.graph.2) == 0)) -> entry.graph.2
+
+# ---
+# ---
+# Basic rentrez use
+# Example 3: For a pair of edges, retrieve abstracts from PubMed that are matched
+# by using the names of vertex pairs for this example, use entry.graph under Example 2;
+# for illustrative purposes, we restrict the example to ten randomly-selected vertex pairs
+strsplit(as_ids(E(entry.graph)[sample(vcount(entry.graph), 10)]), "\\|") -> vp
+sapply(vp, function(x) paste(x, collapse=" AND ")) -> keywords
+lapply(keywords, function(x) entrez_search(db="pubmed", term=x, retmax=1000)) -> res
+lapply(res, function(x) ifelse(length(x) > 0, x$ids, NA)) -> pmids # pubmed ids, if hits are not null
+records <- entrez_fetch(db="pubmed", id=unique(unlist(pmids)), rettype="xml", parsed=TRUE) # returns parsed XML documents
+records <- XML::xmlToList(records)
+
+# to access the abstract of the first record:
+records[[1]]$MedlineCitation$Article$Abstract$AbstractText
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
