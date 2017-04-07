@@ -6,8 +6,6 @@
 ##
 ##========================================================
 
-require(plyr)
-require(parallel)
 
 calcSimilarity <- function(graph.1, graph.2){
   # http://lists.nongnu.org/archive/html/igraph-help/2008-04/msg00017.html
@@ -71,6 +69,9 @@ subgraphFromDataFrame <- function(graph, df){
 }
 
 constructGraph <- function(nn, ppis, p, mode=c("single", "multi")){
+  !is.loaded("parallel") library("parallel")
+  !is.loaded("plyr") library("plyr")
+  
   # creates a graph from a list nn; each slot of nn contains 
   # a list of neighbors of some proteins p
   # length of nn[[i]] == length(p)
