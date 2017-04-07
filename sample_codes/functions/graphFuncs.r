@@ -69,8 +69,7 @@ subgraphFromDataFrame <- function(graph, df){
 }
 
 constructGraph <- function(nn, ppis, p, mode=c("single", "multi")){
-  !is.loaded("parallel") library("parallel")
-  !is.loaded("plyr") library("plyr")
+  if(!is.loaded("parallel")) library("parallel")
   
   # creates a graph from a list nn; each slot of nn contains 
   # a list of neighbors of some proteins p
@@ -85,33 +84,25 @@ constructGraph <- function(nn, ppis, p, mode=c("single", "multi")){
   
   if (mode == "single"){
     lapply(1:length(nn), function(x){
-      gdf <- matrix(0, nrow=0, ncol=2)
-      colnames(gdf) <- c("source", "target")
       if (length(nn[[x]]) > 0){
-        nn[[x]][which(nn[[x]] %ni% p[x])] -> fin
-        cbind(rep(p[x], length(fin)), fin) -> t
-        colnames(t) <- colnames(gdf)
-        rbind(gdf, t) -> gdf
+        nn[[x]][which(nn[[x]] %ni% names(nn)[x])] -> fin
+        cbind.data.frame(rep(names(nn)[x], length(fin)), fin) -> gdf
       }
       return(gdf)
     }) -> sg.df
   } else if (mode == "multi"){
     mclapply(1:length(nn), function(x){
-      gdf <- matrix(0, nrow=0, ncol=2)
-      colnames(gdf) <- c("source", "target")
       if (length(nn[[x]]) > 0){
-        nn[[x]][which(nn[[x]] %ni% p[x])] -> fin
-        cbind(rep(p[x], length(fin)), fin) -> t
-        colnames(t) <- colnames(gdf)
-        rbind(gdf, t) -> gdf
+        nn[[x]][which(nn[[x]] %ni% names(nn)[x])] -> fin
+        cbind.data.frame(rep(names(nn)[x], length(fin)), fin) -> gdf
       }
       return(gdf)
-    }, mc.cores = detectCores()-1) -> sg.df
+    }, mc.cores=detectCores()-1) -> sg.df
   }
   
   sg.df[which(sapply(sg.df, function(x) nrow(x)) > 0)] -> sg.df
-  sg.df <- ldply (sg.df, data.frame)
-  
+  sg.df <- do.call("rbind.data.frame", sg.df)
+  colnames(sg.df) <- c("source", "target")
   as.character(sg.df$source) -> sg.df$source
   as.character(sg.df$target) -> sg.df$target
   
