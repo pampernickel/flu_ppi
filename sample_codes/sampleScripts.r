@@ -1,7 +1,6 @@
 # ---
 # Selected code to demonstrate described results in
-# `Finding functional modules in protein-protein interaction networks: highlights from 
-# the virus-host interactome experience '
+# `Context-based retrieval of functional modules in protein–protein interaction networks'
 # c. MPDobay, 2016
 # SystemsX Project, SIB Swiss Institute of Bioinformatics
 # ---
