@@ -214,13 +214,6 @@ intersect(which(df$to %in% V(string)$name),
           which(df$from %in% V(string)$name)) -> ind
 df[ind,] -> df
 
-# Retrieve abstracts
-# Note that the following commands yield the same result:
-# alternately, abstracts can be retrieved using the combination of commands
-# r <- entrez_fetch(db="pubmed", id=unique(unlist(pmids)), rettype="xml", parsed=TRUE) # returns parsed XML documents
-# records <- XML::xmlToList(r)
-# records[[1]]$MedlineCitation$Article$Abstract$AbstractText
-
 pmids <- apply(df[1:5,1:2], 1, function(x) 
   string.db$get_pubmed_interaction(x[1], x[2]))
 xml.trees <- lapply(pmids, function(x){ 
@@ -253,7 +246,20 @@ lapply(1:length(abstract), function(x){
   return(ind)
 }) -> matches
 
+# check if there are other abstracts in PubMed that co-mention the vertices; abstracts
+# NOT necessarily included as evidence for the edge in STRING
+sapply(1:length(source), function(x) paste(source[x], " AND ", target[x], sep="")) -> keywords
+lapply(keywords, function(x) entrez_search(db="pubmed", term=x, retmax=1000)) -> res
 
+# check if results of pmids.rentrez are in STRING pmids
+check <- sapply(1:length(pmids), function(x){
+  if (length(res[[x]]$ids) > 0){
+    length(intersect(gsub("PMID:", "", pmids[[x]]), res[[x]]$ids))
+  }
+})
+check
+
+# 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # Addenda
