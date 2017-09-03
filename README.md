@@ -6,3 +6,6 @@ These scripts have been used in: Brief Bioinform bbx029. https://doi.org/10.1093
 
 Sample codes that contain vertex- and edge-based context filtering are in:
 https://github.com/pampernickel/flu_ppi/blob/master/sample_codes/sampleScripts.r
+
+All data required for the sample scripts are in:
+https://github.com/pampernickel/flu_ppi/tree/master/data
